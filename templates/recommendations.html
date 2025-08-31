@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommendations Dashboard - Business Matchmaking Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root{
+            --bg: #0b1220; --card: rgba(255,255,255,0.08); --glass: rgba(255,255,255,0.12);
+            --text:#e9eefc; --muted:#a6b1d0; --primary:#6c8bff; --primary-2:#9b6cff; --accent:#22e3a1;
+        }
+        body{background: radial-gradient(1200px 600px at 80% -10%, rgba(108,139,255,.25), transparent 60%), radial-gradient(900px 500px at -10% 20%, rgba(155,108,255,.25), transparent 60%), var(--bg); color: var(--text)}
+        .navbar{backdrop-filter: blur(10px); background: linear-gradient(90deg, rgba(12,18,32,.8), rgba(12,18,32,.6)); border-bottom:1px solid rgba(255,255,255,.06)}
+        .hero-section {
+            background: linear-gradient(135deg, rgba(108,139,255,.35) 0%, rgba(155,108,255,.35) 100%);
+            color: white;
+            padding: 80px 0;
+        }
+        .card {
+            border: none; border-radius: 18px; backdrop-filter: blur(10px);
+            background: var(--card);
+            box-shadow: 0 12px 40px rgba(0,0,0,.35);
+            margin-bottom: 20px;
+        }
+        .card-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            font-weight: bold;
+        }
+        .match-score {
+            background: linear-gradient(45deg, #ffb14b, #ff6b6b);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .ai-insight {
+            background: linear-gradient(45deg, #15c97a, #13b0e0);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .ai-insight-content {
+            /* Remove height limit and scrolling - show full content */
+            overflow: visible;
+        }
+        
+        .ai-section {
+            margin-bottom: 20px;
+            line-height: 1.7;
+            text-align: left;
+            padding: 10px 0;
+        }
+        
+        .ai-section strong {
+            color: #ffffff;
+            display: block;
+            margin-bottom: 6px;
+            font-size: 1.1em;
+        }
+        /* Ensure readable text on light blocks inside AI section */
+        .ai-insight .bg-light {
+            background-color: #f8f9fa !important;
+            color: #212529 !important;
+        }
+        .ai-insight .bg-light h6,
+        .ai-insight .bg-light strong,
+        .ai-insight .bg-light p,
+        .ai-insight .bg-light small { 
+            color: #212529 !important; 
+        }
+        .ai-insight .bg-light .text-muted { 
+            color: #6c757d !important; 
+        }
+        /* Global readability on light backgrounds */
+        .bg-light, .bg-white {
+            color: #212529 !important;
+        }
+        .bg-light .text-white, .bg-white .text-white {
+            color: #212529 !important;
+        }
+        .bg-light .text-muted, .bg-white .text-muted {
+            color: #6c757d !important;
+        }
+        .bg-light .text-success, .bg-white .text-success {
+            color: #198754 !important;
+        }
+        .bg-light .text-info, .bg-white .text-info {
+            color: #0dcaf0 !important;
+        }
+        .property-card {
+            border-left: 4px solid #667eea;
+        }
+        .franchise-card {
+            border-left: 4px solid #00b894;
+        }
+        .entrepreneur-card {
+            border-left: 4px solid #fdcb6e;
+        }
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+            pointer-events: none; /* never block navigation/clicks */
+        }
+        .stats-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+        .nav-tabs .nav-link {
+            border: none;
+            color: #666;
+            font-weight: 500;
+        }
+        .nav-tabs .nav-link.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%);
+            color: white;
+            border-radius: 10px;
+        }
+        .tilt{ transform-style: preserve-3d; will-change: transform }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-handshake me-2"></i>
+                Business Matchmaking Platform
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">Home</a>
+                <a class="nav-link active" href="/recommendations">Recommendations</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container text-center">
+            <h1 class="display-4 mb-4">
+                <i class="fas fa-chart-line me-3"></i>
+                AI-Powered Recommendations Dashboard
+            </h1>
+            <p class="lead">Discover properties, franchises, and investment opportunities with intelligent matching</p>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="stats-card text-center">
+                        <i class="fas fa-building fa-2x mb-3"></i>
+                        <h3 id="propertyCount">0</h3>
+                        <p>Properties Listed</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card text-center">
+                        <i class="fas fa-store fa-2x mb-3"></i>
+                        <h3 id="franchiseCount">0</h3>
+                        <p>Franchise Opportunities</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card text-center">
+                        <i class="fas fa-user-tie fa-2x mb-3"></i>
+                        <h3 id="entrepreneurCount">0</h3>
+                        <p>Entrepreneurs</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card text-center">
+                        <i class="fas fa-chart-pie fa-2x mb-3"></i>
+                        <h3 id="matchCount">0</h3>
+                        <p>AI Matches</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="py-5">
+        <div class="container">
+            <!-- Navigation Tabs -->
+            <ul class="nav nav-tabs mb-4" id="recommendationTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">
+                        <i class="fas fa-th-large me-2"></i>Overview
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="properties-tab" data-bs-toggle="tab" data-bs-target="#properties" type="button" role="tab">
+                        <i class="fas fa-building me-2"></i>Properties
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="franchises-tab" data-bs-toggle="tab" data-bs-target="#franchises" type="button" role="tab">
+                        <i class="fas fa-store me-2"></i>Franchises
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="entrepreneurs-tab" data-bs-toggle="tab" data-bs-target="#entrepreneurs" type="button" role="tab">
+                        <i class="fas fa-user-tie me-2"></i>Entrepreneurs
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Tab Content -->
+            <div class="tab-content" id="recommendationTabContent">
+                <!-- Overview Tab -->
+                <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div>
+                            <span class="badge bg-success me-2"><i class="fas fa-robot me-1"></i>AI</span>
+                            <small id="overviewUpdatedText" class="text-muted">Last updated: —</small>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="refreshOverviewBtn">
+                                <i class="fas fa-rotate-right me-1"></i>Refresh AI Data
+                            </button>
+                            <button type="button" class="btn btn-outline-warning btn-sm" id="clearCacheBtn">
+                                <i class="fas fa-trash me-1"></i>Clear Browser Cache
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="loading" id="overviewLoading">
+                        <i class="fas fa-spinner fa-spin fa-2x mb-3"></i>
+                        <p>Loading AI recommendations...</p>
+                    </div>
+                    <div id="overviewContent" style="display: none;">
+                        <!-- Content will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Properties Tab -->
+                <div class="tab-pane fade" id="properties" role="tabpanel">
+                    <div class="loading" id="propertiesLoading">
+                        <i class="fas fa-spinner fa-spin fa-2x mb-3"></i>
+                        <p>Loading properties...</p>
+                    </div>
+                    <div id="propertiesContent" style="display: none;">
+                        <!-- Properties will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Franchises Tab -->
+                <div class="tab-pane fade" id="franchises" role="tabpanel">
+                    <div class="loading" id="franchisesLoading">
+                        <i class="fas fa-spinner fa-spin fa-2x mb-3"></i>
+                        <p>Loading franchises...</p>
+                    </div>
+                    <div id="franchisesContent" style="display: none;">
+                        <!-- Franchises will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Entrepreneurs Tab -->
+                <div class="tab-pane fade" id="entrepreneurs" role="tabpanel">
+                    <div class="loading" id="entrepreneursLoading">
+                        <i class="fas fa-spinner fa-spin fa-2x mb-3"></i>
+                        <p>Loading entrepreneurs...</p>
+                    </div>
+                    <div id="entrepreneursContent" style="display: none;">
+                        <!-- Entrepreneurs will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4">
+        <div class="container text-center">
+            <p>&copy; 2024 Business Matchmaking Platform. Powered by Foursquare APIs & AI.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Lightweight tilt effect on cards
+        document.addEventListener('mousemove', (e) => {
+            document.querySelectorAll('.tilt').forEach((el) => {
+                const rect = el.getBoundingClientRect();
+                const cx = rect.left + rect.width / 2;
+                const cy = rect.top + rect.height / 2;
+                const dx = (e.clientX - cx) / rect.width;
+                const dy = (e.clientY - cy) / rect.height;
+                el.style.transform = `rotateY(${dx * 6}deg) rotateX(${ -dy * 6}deg)`;
+            });
+        });
+        document.addEventListener('mouseleave', () => {
+            document.querySelectorAll('.tilt').forEach((el)=> el.style.transform = '');
+        }, true);
+
+        // Toggle AI insight sections on click
+        document.addEventListener('click', function(e){
+            const btn = e.target.closest('[data-toggle="insight"]');
+            if (!btn) return;
+            const sel = btn.getAttribute('data-target');
+            if (!sel) return;
+            const panel = document.querySelector(sel);
+            if (!panel) return;
+            panel.classList.toggle('d-none');
+            btn.innerHTML = panel.classList.contains('d-none') ? '<i class="fas fa-eye me-1"></i>Show AI Insight' : '<i class="fas fa-eye-slash me-1"></i>Hide AI Insight';
+        });
+    </script>
+    <script>
+        // Simple local cache for AI recommendations (Overview tab)
+        const OVERVIEW_CACHE_KEY = 'bm_overview_recommendations_v1';
+        const OVERVIEW_CACHE_TIME_KEY = 'bm_overview_recommendations_time_v1';
+        // Disable automatic TTL-based refresh; only refresh when user clicks button
+        const OVERVIEW_CACHE_TTL_MS = Number.MAX_SAFE_INTEGER;
+
+        function setOverviewUpdatedText(dateMs) {
+            const el = document.getElementById('overviewUpdatedText');
+            if (!el) return;
+            if (!dateMs) { el.textContent = 'Last updated: —'; return; }
+            const d = new Date(dateMs);
+            el.textContent = `Last updated: ${d.toLocaleString()}`;
+        }
+
+        function cacheOverview(data) {
+            try {
+                localStorage.setItem(OVERVIEW_CACHE_KEY, JSON.stringify(data));
+                localStorage.setItem(OVERVIEW_CACHE_TIME_KEY, String(Date.now()));
+                setOverviewUpdatedText(Date.now());
+            } catch (e) {
+                console.warn('Overview cache write failed', e);
+            }
+        }
+
+        function readOverviewFromCache() {
+            try {
+                const raw = localStorage.getItem(OVERVIEW_CACHE_KEY);
+                const ts = Number(localStorage.getItem(OVERVIEW_CACHE_TIME_KEY) || 0);
+                if (!raw) return { data: null, ts: 0 };
+                const data = JSON.parse(raw);
+                return { data, ts };
+            } catch (e) {
+                return { data: null, ts: 0 };
+            }
+        }
+
+        function isOverviewCacheFresh(ts) {
+            if (!ts) return false;
+            return (Date.now() - ts) < OVERVIEW_CACHE_TTL_MS;
+        }
+
+        function formatAIValue(value) {
+            if (typeof value === 'object' && value !== null) {
+                if (Array.isArray(value)) {
+                    return value.join(', ');
+                } else {
+                    // Try to extract meaningful text from object
+                    if (value.text) return value.text;
+                    if (value.description) return value.description;
+                    if (value.summary) return value.summary;
+                    if (value.recommendation) return value.recommendation;
+                    
+                    // Special handling for property analysis objects
+                    if (value.current_rent && value.market_average) {
+                        // Rent analysis object
+                        const gapText = value.gap_analysis ? (typeof value.gap_analysis === 'string' ? value.gap_analysis : JSON.stringify(value.gap_analysis)) : '';
+                        return `Current: ${value.current_rent}, Market Avg: ${value.market_average}${gapText ? ` - ${gapText.length > 80 ? gapText.substring(0, 80) + '...' : gapText}` : ''}`;
+                    }
+                    if (value.current_asking_price && value.market_value_estimate) {
+                        // Price analysis object
+                        return `Asking: ${value.current_asking_price}, Market: ${value.market_value_estimate}${value.valuation_method ? ` (${value.valuation_method})` : ''}`;
+                    }
+                    if (value.roi_calculation) {
+                        // Investment potential object
+                        const roiText = typeof value.roi_calculation === 'string' ? value.roi_calculation : JSON.stringify(value.roi_calculation);
+                        return roiText.length > 120 ? roiText.substring(0, 120) + '...' : roiText;
+                    }
+                    
+                    // If none of the above, show as JSON but limit length
+                    const jsonStr = JSON.stringify(value);
+                    return jsonStr.length > 100 ? jsonStr.substring(0, 100) + '...' : jsonStr;
+                }
+            }
+            
+            // Handle string values - try to extract meaningful information
+            if (typeof value === 'string') {
+                // If it looks like JSON, try to parse it
+                if (value.trim().startsWith('{') && value.trim().endsWith('}')) {
+                    try {
+                        const parsed = JSON.parse(value);
+                        if (parsed.current_rent && parsed.market_average) {
+                            return `Current: ${parsed.current_rent}, Market Avg: ${parsed.market_average}${parsed.recommendation ? ` - ${parsed.recommendation.substring(0, 80)}...` : ''}`;
+                        }
+                        if (parsed.current_price && parsed.market_value_estimate) {
+                            return `Current: ${parsed.current_price}, Market: ${parsed.market_value_estimate}`;
+                        }
+                        // If it's a simple object, extract the most relevant field
+                        const keys = Object.keys(parsed);
+                        if (keys.length > 0) {
+                            const firstKey = keys[0];
+                            const firstValue = parsed[firstKey];
+                            if (typeof firstValue === 'string') {
+                                return firstValue.length > 120 ? firstValue.substring(0, 120) + '...' : firstValue;
+                            }
+                        }
+                    } catch (e) {
+                        // If JSON parsing fails, treat as regular string
+                    }
+                }
+                
+                // For regular strings, show full content without any truncation
+                if (value.includes(',') && value.length > 200) {
+                    // For lists, show all items without truncation
+                    const items = value.split(',');
+                    return items.join(', ');
+                } else {
+                    // For regular text, show full content without any truncation
+                    return value;
+                }
+            }
+            
+            return value || 'Not available';
+        }
+
+        function renderOverview(data) {
+            let html = '<div class="row">';
+            
+            // Property Owners with AI Analysis
+            if (data.property_owners && data.property_owners.length > 0) {
+                html += '<div class="col-md-6 mb-4">';
+                html += '<div class="card property-card tilt">';
+                html += '<div class="card-header"><i class="fas fa-building me-2"></i>Properties with AI Analysis</div>';
+                html += '<div class="card-body">';
+                
+                data.property_owners.forEach(owner => {
+                    html += '<div class="mb-3 p-3 border rounded">';
+                    html += `<h6><i class="fas fa-user me-2"></i>${owner.name}</h6>`;
+                    // Handle different field naming conventions
+                    const propertyType = owner.property_details.property_type || owner.property_details.type || 'N/A';
+                    const propertySize = owner.property_details.area_sqft || owner.property_details.size || 'N/A';
+                    const propertyAddress = owner.property_details.address || (owner.property_details.location && owner.property_details.location.address) || 'N/A';
+                    
+                    html += `<div class="d-flex justify-content-between align-items-center mb-2">`;
+                    html += `<div>`;
+                    html += `<p class="mb-1"><strong>Email:</strong> ${owner.email || 'Not provided'}</p>`;
+                    html += `<p class="mb-1"><strong>Phone:</strong> ${owner.phone || 'Not provided'}</p>`;
+                    html += `</div>`;
+                    html += `<button class="btn btn-sm btn-outline-light" onclick="showContactInfo('${owner.name}', '${owner.email || 'N/A'}', '${owner.phone || 'N/A'}', 'Property Owner', '${propertyType} - ${propertySize} sq ft')">`;
+                    html += `<i class="fas fa-address-card me-1"></i>Contact</button>`;
+                    html += `</div>`;
+                    
+                    html += `<p><strong>Property:</strong> ${propertyType} - ${propertySize} sq ft</p>`;
+                    html += `<p><strong>Location:</strong> ${propertyAddress}</p>`;
+                    
+                    // Display rent and price information
+                    if (owner.property_details.current_rent) {
+                        html += `<p><strong>Monthly Rent:</strong> ₹${owner.property_details.current_rent.toLocaleString()}</p>`;
+                    }
+                    if (owner.property_details.asking_price) {
+                        html += `<p><strong>Sale Price:</strong> ₹${owner.property_details.asking_price.toLocaleString()}</p>`;
+                    }
+                    
+                    if (owner.ai_analysis) {
+                        const insightId = `insight-po-${owner.user_id || owner.name}`;
+                        html += `<button type="button" class="btn btn-sm btn-outline-light mb-2" data-toggle="insight" data-target="#${insightId}"><i class="fas fa-eye me-1"></i>Show AI Insight</button>`;
+                        html += `<div class="ai-insight d-none" id="${insightId}">`;
+                        html += '<h6><i class="fas fa-robot me-2"></i>AI Analysis</h6>';
+                        html += `<div class="ai-insight-content">`;
+                        html += `<p class="ai-section"><strong>Pricing Strategy:</strong> ${formatAIValue(owner.ai_analysis.pricing_strategy)}</p>`;
+                        if (owner.ai_analysis.rent_analysis) {
+                            html += `<p class="ai-section"><strong>Rent Analysis:</strong> ${formatAIValue(owner.ai_analysis.rent_analysis)}</p>`;
+                        }
+                        if (owner.ai_analysis.price_analysis) {
+                            html += `<p class="ai-section"><strong>Price Analysis:</strong> ${formatAIValue(owner.ai_analysis.price_analysis)}</p>`;
+                        }
+                        if (owner.ai_analysis.investment_potential) {
+                            html += `<p class="ai-section"><strong>Investment Potential:</strong> ${formatAIValue(owner.ai_analysis.investment_potential)}</p>`;
+                        }
+                        html += `<p class="ai-section"><strong>Target Franchises:</strong> ${formatAIValue(owner.ai_analysis.target_franchises)}</p>`;
+                        if (owner.ai_analysis.target_entrepreneurs) {
+                            html += `<p class="ai-section"><strong>Target Entrepreneurs:</strong> ${formatAIValue(owner.ai_analysis.target_entrepreneurs)}</p>`;
+                        }
+                        if (owner.ai_analysis.positioning_advice) {
+                            html += `<p class="ai-section"><strong>Positioning Advice:</strong> ${formatAIValue(owner.ai_analysis.positioning_advice)}</p>`;
+                        }
+                        html += '</div></div>';
+                    }
+                    
+                    // Matching Entrepreneurs for this Property Owner
+                    if (owner.matching_entrepreneurs && owner.matching_entrepreneurs.length > 0) {
+                        html += '<div class="mt-3">';
+                        html += '<small class="text-muted"><i class="fas fa-user-tie me-1"></i>Interested Entrepreneurs:</small>';
+                        owner.matching_entrepreneurs.slice(0, 3).forEach(match => {
+                            if (!match || !match.entrepreneur) return; // Skip if match or entrepreneur is undefined
+                            const matchPercent = Math.round(match.match_score * 100);
+                            html += `<div class="card mb-2" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">`;
+                            html += `<div class="card-body p-2">`;
+                            html += `<div class="d-flex justify-content-between align-items-center mb-1">`;
+                            html += `<span class="badge bg-info">${match.entrepreneur.name || 'Unknown'} (${matchPercent}% match)</span>`;
+                            html += `<small class="text-muted">${match.entrepreneur.entrepreneur_type || 'Entrepreneur'}</small>`;
+                            html += `</div>`;
+                            html += `<div class="text-center mt-2">`;
+                            html += `<button class="btn btn-info btn-sm fw-bold" style="box-shadow: 0 2px 8px rgba(0, 212, 255, 0.3);" onclick="showContactInfo('${match.entrepreneur.name || 'Unknown'}', '${match.entrepreneur.email || 'N/A'}', '${match.entrepreneur.phone || 'N/A'}', '${match.entrepreneur.entrepreneur_type || 'Entrepreneur'}', '₹${(match.entrepreneur.budget || 0).toLocaleString()}')">`;
+                            html += `<i class="fas fa-address-card me-1"></i>📞 CONTACT</button>`;
+                            html += `</div>`;
+                            html += `<div class="row">`;
+                            html += `<div class="col-6"><small><strong>Budget:</strong> ₹${(match.entrepreneur.budget || 0).toLocaleString()}</small></div>`;
+                            html += `<div class="col-6"><small><strong>Location:</strong> ${match.entrepreneur.pincode || 'N/A'}</small></div>`;
+                            html += `</div>`;
+                            html += `<div class="row mt-1">`;
+                            html += `<div class="col-6"><small><strong>Email:</strong> ${match.entrepreneur.email || 'N/A'}</small></div>`;
+                            html += `<div class="col-6"><small><strong>Phone:</strong> ${match.entrepreneur.phone || 'N/A'}</small></div>`;
+                            html += `</div>`;
+                            if (match.reasoning) {
+                                html += `<div class="mt-1">`;
+                                html += `<small class="text-info"><i class="fas fa-info-circle me-1"></i>${match.reasoning}</small>`;
+                                html += `</div>`;
+                            }
+                            html += `</div></div>`;
+                        });
+                        html += '</div>';
+                    }
+                    
+                    // Matching Franchise Companies for this Property Owner
+                    console.log(`🔍 Checking matching franchises for ${owner.name}:`, owner.matching_franchises);
+                    if (owner.matching_franchises && owner.matching_franchises.length > 0) {
+                        console.log(`✅ Rendering franchise matches for ${owner.name}`);
+                        html += '<div class="mt-3">';
+                        html += '<small class="text-muted"><i class="fas fa-store me-1"></i>Interested Franchise Companies:</small>';
+                        owner.matching_franchises.slice(0, 3).forEach(match => {
+                            if (!match || !match.franchise) return; // Skip if match or franchise is undefined
+                            const matchPercent = Math.round(match.match_score * 100);
+                            html += `<div class="card mb-2" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">`;
+                            html += `<div class="card-body p-2">`;
+                            html += `<div class="d-flex justify-content-between align-items-center mb-1">`;
+                            html += `<span class="badge bg-success">${match.franchise.company_name || 'Unknown'} (${matchPercent}% match)</span>`;
+                            html += `<small class="text-muted">${match.franchise.franchise_requirements?.category || 'Franchise'}</small>`;
+                            html += `</div>`;
+                            html += `<div class="text-center mt-2">`;
+                            html += `<button class="btn btn-success btn-sm fw-bold" style="box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);" onclick="showContactInfo('${match.franchise.company_name || 'Unknown'}', '${match.franchise.email || 'N/A'}', '${match.franchise.phone || 'N/A'}', '${match.franchise.franchise_requirements?.category || 'Franchise'}', '₹${(match.franchise.franchise_requirements?.investment_required || 0).toLocaleString()}')">`;
+                            html += `<i class="fas fa-address-card me-1"></i>📞 CONTACT</button>`;
+                            html += `</div>`;
+                            html += `<div class="row">`;
+                            html += `<div class="col-6"><small><strong>Investment:</strong> ₹${(match.franchise.franchise_requirements?.investment_required || 0).toLocaleString()}</small></div>`;
+                            html += `<div class="col-6"><small><strong>Area Required:</strong> ${match.franchise.franchise_requirements?.area_size || 'N/A'} sq ft</small></div>`;
+                            html += `</div>`;
+                            html += `<div class="row mt-1">`;
+                            html += `<div class="col-6"><small><strong>Email:</strong> ${match.franchise.email || 'N/A'}</small></div>`;
+                            html += `<div class="col-6"><small><strong>Phone:</strong> ${match.franchise.phone || 'N/A'}</small></div>`;
+                            html += `</div>`;
+                            if (match.reasoning) {
+                                html += `<div class="mt-1">`;
+                                html += `<small class="text-success"><i class="fas fa-info-circle me-1"></i>${match.reasoning}</small>`;
+                                html += `</div>`;
+                            }
+                            html += `</div></div>`;
+                        });
+                        html += '</div>';
+                    }
+                    
+                    html += '</div>';
+                });
+                
+                html += '</div></div></div>';
+            }
+            
+            // Entrepreneurs with Enhanced Matches and Business Ideas
+            if (data.entrepreneurs && data.entrepreneurs.length > 0) {
+                html += '<div class="col-md-6 mb-4">';
+                html += '<div class="card entrepreneur-card tilt">';
+                html += '<div class="card-header"><i class="fas fa-user-tie me-2"></i>Entrepreneurs with AI Recommendations</div>';
+                html += '<div class="card-body">';
+                
+                data.entrepreneurs.forEach(entrepreneur => {
+                    html += '<div class="mb-3 p-3 border rounded">';
+                    html += `<h6><i class="fas fa-user me-2"></i>${entrepreneur.name}</h6>`;
+                    html += `<div class="d-flex justify-content-between align-items-center mb-2">`;
+                    html += `<div>`;
+                    html += `<p class="mb-1"><strong>Type:</strong> ${entrepreneur.entrepreneur_type}</p>`;
+                    html += `<p class="mb-1"><strong>Budget:</strong> ₹${entrepreneur.budget.toLocaleString()}</p>`;
+                    html += `<p class="mb-1"><strong>Pincode:</strong> ${entrepreneur.pincode || 'Not provided'}</p>`;
+                    html += `<p class="mb-1"><strong>Email:</strong> ${entrepreneur.email || 'Not provided'}</p>`;
+                    html += `<p class="mb-1"><strong>Phone:</strong> ${entrepreneur.phone || 'Not provided'}</p>`;
+                    html += `</div>`;
+                    html += `<button class="btn btn-sm btn-outline-light" onclick="showContactInfo('${entrepreneur.name}', '${entrepreneur.email || 'N/A'}', '${entrepreneur.phone || 'N/A'}', '${entrepreneur.entrepreneur_type}', '₹${entrepreneur.budget.toLocaleString()}')">`;
+                    html += `<i class="fas fa-address-card me-1"></i>Contact</button>`;
+                    html += `</div>`;
+                    
+                    if (entrepreneur.location_data) {
+                        html += `<p><strong>Location:</strong> ${entrepreneur.location_data.city}, ${entrepreneur.location_data.state}</p>`;
+                    }
+                    
+                    // AI Business Ideas with Enhanced Competition Analysis
+                    if (entrepreneur.ai_business_ideas && entrepreneur.ai_business_ideas.length > 0) {
+                        const ideasId = `insight-en-${entrepreneur.user_id || entrepreneur.name}`;
+                        html += `<button type="button" class="btn btn-sm btn-outline-light mb-2" data-toggle="insight" data-target="#${ideasId}"><i class="fas fa-bolt me-1"></i>Show AI Ideas</button>`;
+                        html += `<div class="ai-insight mt-2 d-none" id="${ideasId}">`;
+                        html += '<h6><i class="fas fa-lightbulb me-2"></i>AI-Generated Business Ideas (Real Data)</h6>';
+                        entrepreneur.ai_business_ideas.slice(0, 4).forEach(idea => {
+                            const isAIGenerated = idea.ai_generated !== false;
+                            const isEntrepreneurIdea = idea.is_entrepreneur_idea === true;
+                            let badge = '';
+                            if (isEntrepreneurIdea) {
+                                badge = '<span class="badge bg-warning me-1">Your Idea</span>';
+                            } else if (isAIGenerated) {
+                                badge = '<span class="badge bg-success me-1">AI</span>';
+                            } else {
+                                badge = '<span class="badge bg-secondary me-1">Mock</span>';
+                            }
+                            
+                            html += `<div class="mb-3 p-3 bg-light rounded">`;
+                            html += `${badge}<strong>${idea.title || idea.concept}</strong><br>`;
+                            
+                            if (idea.description) {
+                                html += `<small class="text-muted">${idea.description}</small><br>`;
+                            }
+                            
+                            html += `<div class="row mt-2">`;
+                            html += `<div class="col-6"><small><strong>Cost:</strong> ₹${idea.startup_cost.toLocaleString()}</small></div>`;
+                            html += `<div class="col-6"><small><strong>Market:</strong> ${idea.market_potential}</small></div>`;
+                            html += `</div>`;
+                            
+                            html += `<div class="row">`;
+                            html += `<div class="col-6"><small><strong>Risk:</strong> ${idea.risk_level}</small></div>`;
+                            html += `<div class="col-6"><small><strong>Confidence:</strong> ${idea.confidence_score}%</small></div>`;
+                            html += `</div>`;
+                            
+                            // Enhanced Competition Analysis
+                            html += `<div class="mt-2 p-2 bg-info text-white rounded">`;
+                            html += `<small><strong>Competition Analysis:</strong></small><br>`;
+                            html += `<small>Level: ${idea.competition_level}</small><br>`;
+                            html += `<small>Nearby Businesses: ${idea.total_nearby_businesses || 0}</small><br>`;
+                            html += `<small>Direct Competitors: ${idea.direct_competitors || 0}</small><br>`;
+                            html += `<small>Market Saturation: ${idea.market_saturation || 'Unknown'}</small>`;
+                            html += `</div>`;
+                            
+                            // Financial Analysis
+                            if (idea.expected_roi || idea.break_even_period || idea.monthly_operating_cost) {
+                                html += `<div class="mt-2 p-2 bg-success text-white rounded">`;
+                                html += `<small><strong>Financial Analysis:</strong></small><br>`;
+                                if (idea.expected_roi) html += `<small>Expected ROI: ${idea.expected_roi}</small><br>`;
+                                if (idea.break_even_period) html += `<small>Break-even: ${idea.break_even_period}</small><br>`;
+                                if (idea.monthly_operating_cost) html += `<small>Monthly Cost: ₹${idea.monthly_operating_cost.toLocaleString()}</small>`;
+                                html += `</div>`;
+                            }
+                            
+                            html += `</div>`;
+                        });
+                        html += '</div>';
+                    } else {
+                        html += '<div class="mt-2 p-2 bg-warning text-dark rounded">';
+                        html += '<small><i class="fas fa-exclamation-triangle me-1"></i>AI business ideas not available. Check Mistral AI connection.</small>';
+                        html += '</div>';
+                    }
+                    
+                    // Matching Properties with Foursquare Data
+                    if (entrepreneur.matching_properties && entrepreneur.matching_properties.length > 0) {
+                        html += '<div class="mt-3">';
+                        html += '<small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>Top Property Matches:</small>';
+                        entrepreneur.matching_properties.slice(0, 2).forEach(match => {
+                            if (!match || !match.property_owner) return; // Skip if match or property_owner is undefined
+                            const matchPercent = Math.round(match.match_score * 100);
+                            html += `<div class="card mb-2" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">`;
+                            html += `<div class="card-body p-2">`;
+                            html += `<div class="d-flex justify-content-between align-items-center mb-1">`;
+                            html += `<span class="badge bg-primary">${match.property_owner.name || 'Unknown'} (${matchPercent}% match)</span>`;
+                            html += `<small class="text-muted">${match.property_owner.property_details?.property_type || 'Property'}</small>`;
+                            html += `</div>`;
+                            html += `<div class="text-center mt-2">`;
+                            html += `<button class="btn btn-primary btn-sm fw-bold" style="box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);" onclick="showContactInfo('${match.property_owner.name || 'Unknown'}', '${match.property_owner.email || 'N/A'}', '${match.property_owner.phone || 'N/A'}', 'Property Owner', '${match.property_owner.property_details?.property_type || 'Property'}')">`;
+                            html += `<i class="fas fa-address-card me-1"></i>📞 CONTACT</button>`;
+                            html += `</div>`;
+                            html += `<div class="row">`;
+                            html += `<div class="col-6"><small><strong>Size:</strong> ${match.property_owner.property_details?.area_sqft || 'N/A'} sq ft</small></div>`;
+                            html += `<div class="col-6"><small><strong>Rent:</strong> ₹${match.property_owner.property_details?.current_rent?.toLocaleString() || 'N/A'}</small></div>`;
+                            html += `</div>`;
+                            html += `<div class="row mt-1">`;
+                            html += `<div class="col-6"><small><strong>Email:</strong> ${match.property_owner.email || 'N/A'}</small></div>`;
+                            html += `<div class="col-6"><small><strong>Phone:</strong> ${match.property_owner.phone || 'N/A'}</small></div>`;
+                            html += `</div>`;
+                            if (match.estimated_value) {
+                                html += `<div class="row">`;
+                                html += `<div class="col-6"><small><strong>Est. Value:</strong> ₹${match.estimated_value.toLocaleString()}</small></div>`;
+                                html += `<div class="col-6"><small><strong>Nearby:</strong> ${match.nearby_businesses || 0} businesses</small></div>`;
+                                html += `</div>`;
+                            }
+                            if (match.distance_km) {
+                                html += `<div class="mt-1">`;
+                                html += `<small class="text-warning"><i class="fas fa-map-marker-alt me-1"></i>${match.distance_km.toFixed(1)} km away</small>`;
+                                html += `</div>`;
+                            }
+                            html += `</div></div>`;
+                        });
+                        html += '</div>';
+                    }
+                    
+                    // Matching Franchises
+                    if (entrepreneur.matching_franchises && entrepreneur.matching_franchises.length > 0) {
+                        html += '<div class="mt-3">';
+                        html += '<small class="text-muted"><i class="fas fa-store me-1"></i>Top Franchise Matches:</small>';
+                        entrepreneur.matching_franchises.slice(0, 2).forEach(match => {
+                            if (!match || !match.franchise) return; // Skip if match or franchise is undefined
+                            
+                            // Debug: Log what's being processed
+                            console.log('🎯 Processing franchise match:', {
+                                name: match.franchise.company_name,
+                                email: match.franchise.email,
+                                phone: match.franchise.phone,
+                                emailType: typeof match.franchise.email,
+                                phoneType: typeof match.franchise.phone
+                            });
+                            
+                            // Debug: Log the entire franchise object structure
+                            console.log('🏢 Full franchise object:', match.franchise);
+                            console.log('🔍 Available franchise properties:', Object.keys(match.franchise));
+                            
+                            // Debug: Check if email and phone exist in the object
+                            console.log('📧 Email exists:', 'email' in match.franchise);
+                            console.log('📱 Phone exists:', 'phone' in match.franchise);
+                            console.log('📧 Email value:', match.franchise.email);
+                            console.log('📱 Phone value:', match.franchise.phone);
+                            
+                            const matchPercent = Math.round(match.match_score * 100);
+                            html += `<div class="card mb-2" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">`;
+                            html += `<div class="card-body p-2">`;
+                            html += `<div class="d-flex justify-content-between align-items-center mb-1">`;
+                            html += `<span class="badge bg-success">${match.franchise.company_name || 'Unknown'} (${matchPercent}% match)</span>`;
+                            html += `<small class="text-muted">${match.franchise.franchise_requirements?.category || 'Franchise'}</small>`;
+                            html += `</div>`;
+                            html += `<div class="text-center mt-2">`;
+                            html += `<button class="btn btn-success btn-sm fw-bold" style="box-shadow: 0 2px 8px rgba(25, 135, 84, 0.3);" onclick="showContactInfo('${match.franchise.company_name || 'Unknown'}', '${match.franchise.email || 'N/A'}', '${match.franchise.phone || 'N/A'}', 'Franchise Company', '${match.franchise.franchise_requirements?.category || 'Franchise'}')">`;
+                            html += `<i class="fas fa-address-card me-1"></i>📞 CONTACT</button>`;
+                            html += `</div>`;
+                            html += `<div class="row">`;
+                            html += `<div class="col-6"><small><strong>Investment:</strong> ₹${match.investment_required?.toLocaleString() || 'N/A'}</small></div>`;
+                            html += `<div class="col-6"><small><strong>Area:</strong> ${match.franchise.franchise_requirements?.area_size || 'N/A'} sq ft</small></div>`;
+                            html += `</div>`;
+                            html += `<div class="row mt-1">`;
+                            html += `<div class="col-6"><small><strong>Email:</strong> ${match.franchise.email || 'N/A'}</small></div>`;
+                            html += `<div class="col-6"><small><strong>Phone:</strong> ${match.franchise.phone || 'N/A'}</small></div>`;
+                            html += `</div>`;
+                            if (match.reasoning) {
+                                html += `<div class="mt-1">`;
+                                html += `<small class="text-success"><i class="fas fa-info-circle me-1"></i>${match.reasoning}</small>`;
+                                html += `</div>`;
+                            }
+                            html += `</div></div>`;
+                        });
+                        html += '</div>';
+                    }
+                    
+                    html += '</div>';
+                });
+                
+                html += '</div></div></div>';
+            }
+            
+            // Franchise Companies with Enhanced Location Analysis
+            if (data.franchise_companies && data.franchise_companies.length > 0) {
+                html += '<div class="col-md-6 mb-4">';
+                html += '<div class="card franchise-card tilt">';
+                html += '<div class="card-header"><i class="fas fa-store me-2"></i>Franchise Companies with Location Analysis</div>';
+                html += '<div class="card-body">';
+                
+                data.franchise_companies.forEach(franchise => {
+                    html += '<div class="mb-3 p-3 border rounded">';
+                    html += `<h6><i class="fas fa-building me-2"></i>${franchise.company_name}</h6>`;
+                    html += `<div class="d-flex justify-content-between align-items-center mb-2">`;
+                    html += `<div>`;
+                    html += `<p class="mb-1"><strong>Category:</strong> ${franchise.franchise_requirements.category || 'N/A'}</p>`;
+                    html += `<p class="mb-1"><strong>Investment:</strong> ₹${franchise.franchise_requirements.investment_required?.toLocaleString() || 'N/A'}</p>`;
+                    html += `<p class="mb-1"><strong>Area Required:</strong> ${franchise.franchise_requirements.area_size || 'N/A'} sq ft</p>`;
+                    html += `<p class="mb-1"><strong>Email:</strong> ${franchise.email || 'N/A'}</p>`;
+                    html += `<p class="mb-1"><strong>Phone:</strong> ${franchise.phone || 'N/A'}</p>`;
+                    html += `</div>`;
+                    html += `<button class="btn btn-sm btn-outline-light" onclick="showContactInfo('${franchise.company_name}', '${franchise.email || 'N/A'}', '${franchise.phone || 'N/A'}', 'Franchise Company', '${franchise.franchise_requirements.category || 'Franchise'}')">`;
+                    html += `<i class="fas fa-address-card me-1"></i>Contact</button>`;
+                    html += `</div>`;
+                    
+                    // Display location information if available
+                    if (franchise.franchise_requirements.pincode) {
+                        html += `<p><strong>Target Location:</strong> ${franchise.franchise_requirements.pincode}`;
+                        if (franchise.franchise_requirements.location_description) {
+                            html += ` - ${franchise.franchise_requirements.location_description}`;
+                        }
+                        html += `</p>`;
+                    }
+                    
+                    if (franchise.matching_properties && franchise.matching_properties.length > 0) {
+                        html += '<div class="mt-3">';
+                        html += '<small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>Top Property Matches:</small>';
+                        franchise.matching_properties.slice(0, 2).forEach(match => {
+                            const matchPercent = Math.round(match.match_score * 100);
+                            html += `<div class="card mb-2" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">`;
+                            html += `<div class="card-body p-2">`;
+                            html += `<div class="d-flex justify-content-between align-items-center mb-1">`;
+                            html += `<span class="badge bg-info">${match.property_owner.name} (${matchPercent}% match)</span>`;
+                            html += `<small class="text-muted">${match.property_owner.property_details.property_type || 'Property'}</small>`;
+                            html += `</div>`;
+                            html += `<div class="text-center mt-2">`;
+                            html += `<button class="btn btn-sm btn-outline-info" onclick="showContactInfo('${match.property_owner.name}', '${match.property_owner.email || 'N/A'}', '${match.property_owner.phone || 'N/A'}', 'Property Owner', '${match.property_owner.property_details.property_type || 'Property'}')">`;
+                            html += `<i class="fas fa-address-card me-1"></i>Contact Info</button>`;
+                            html += `</div>`;
+                            html += `<div class="row">`;
+                            html += `<div class="col-6"><small><strong>Size:</strong> ${match.property_owner.property_details.area_sqft || 'N/A'} sq ft</small></div>`;
+                            html += `<div class="col-6"><small><strong>Rent:</strong> ₹${match.property_owner.property_details.current_rent?.toLocaleString() || 'N/A'}</small></div>`;
+                            html += `</div>`;
+                            html += `<div class="row mt-1">`;
+                            html += `<div class="col-6"><small><strong>Email:</strong> ${match.property_owner.email || 'N/A'}</small></div>`;
+                            html += `<div class="col-6"><small><strong>Phone:</strong> ${match.property_owner.phone || 'N/A'}</small></div>`;
+                            html += `</div>`;
+                            if (match.reasoning) {
+                                html += `<div class="mt-1">`;
+                                html += `<small class="text-info"><i class="fas fa-info-circle me-1"></i>${match.reasoning}</small>`;
+                                html += `</div>`;
+                            }
+                            html += `</div></div>`;
+                        });
+                        html += '</div>';
+                    }
+                    
+                    // Matching Entrepreneurs for this Franchise Company
+                    if (franchise.matching_entrepreneurs && franchise.matching_entrepreneurs.length > 0) {
+                        html += '<div class="mt-3">';
+                        html += '<small class="text-muted"><i class="fas fa-user-tie me-1"></i>Interested Entrepreneurs:</small>';
+                        franchise.matching_entrepreneurs.slice(0, 3).forEach(match => {
+                            if (!match || !match.entrepreneur) return; // Skip if match or entrepreneur is undefined
+                            const matchPercent = Math.round(match.match_score * 100);
+                            html += `<div class="card mb-2" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);">`;
+                            html += `<div class="card-body p-2">`;
+                            html += `<div class="d-flex justify-content-between align-items-center mb-1">`;
+                            html += `<span class="badge bg-success">${match.entrepreneur.name || 'Unknown'} (${matchPercent}% match)</span>`;
+                            html += `<small class="text-muted">${match.entrepreneur.entrepreneur_type || 'Entrepreneur'}</small>`;
+                            html += `</div>`;
+                            html += `<div class="text-center mt-2">`;
+                            html += `<button class="btn btn-sm btn-outline-success" onclick="showContactInfo('${match.entrepreneur.name || 'Unknown'}', '${match.entrepreneur.email || 'N/A'}', '${match.entrepreneur.phone || 'N/A'}', '${match.entrepreneur.entrepreneur_type || 'Entrepreneur'}', '₹${(match.entrepreneur.budget || 0).toLocaleString()}')">`;
+                            html += `<i class="fas fa-address-card me-1"></i>Contact Info</button>`;
+                            html += `</div>`;
+                            html += `<div class="row">`;
+                            html += `<div class="col-6"><small><strong>Budget:</strong> ₹${(match.entrepreneur.budget || 0).toLocaleString()}</small></div>`;
+                            html += `<div class="col-6"><small><strong>Location:</strong> ${match.entrepreneur.pincode || 'N/A'}</small></div>`;
+                            html += `</div>`;
+                            html += `<div class="row mt-1">`;
+                            html += `<div class="col-6"><small><strong>Email:</strong> ${match.entrepreneur.email || 'N/A'}</small></div>`;
+                            html += `<div class="col-6"><small><strong>Phone:</strong> ${match.entrepreneur.phone || 'N/A'}</small></div>`;
+                            html += `</div>`;
+                            if (match.reasoning) {
+                                html += `<div class="mt-1">`;
+                                html += `<small class="text-success"><i class="fas fa-info-circle me-1"></i>${match.reasoning}</small>`;
+                                html += `</div>`;
+                            }
+                            html += `</div></div>`;
+                        });
+                        html += '</div>';
+                    }
+                    
+                    html += '</div>';
+                });
+                
+                html += '</div></div></div>';
+            }
+            
+            html += '</div>';
+            
+            document.getElementById('overviewContent').innerHTML = html;
+            document.getElementById('overviewLoading').style.display = 'none';
+            document.getElementById('overviewContent').style.display = 'block';
+            // fillMissingAIFields temporarily disabled to fix ReferenceError
+        }
+
+        // Load platform stats
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const stats = await response.json();
+                document.getElementById('propertyCount').textContent = stats.total_property_owners;
+                document.getElementById('franchiseCount').textContent = stats.total_franchise_companies;
+                document.getElementById('entrepreneurCount').textContent = stats.total_entrepreneurs;
+                document.getElementById('matchCount').textContent = 
+                    stats.total_property_owners + stats.total_franchise_companies + stats.total_entrepreneurs;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        // Load overview recommendations with fresh data (no caching)
+        async function loadOverview(forceRefresh = false) {
+            try {
+                // Always fetch fresh data - no caching
+                console.log('Fetching fresh overview data');
+                
+                // Clear all cached data to force fresh fetch
+                localStorage.removeItem('bm_overview_recommendations_v1');
+                localStorage.removeItem('bm_overview_recommendations_time_v1');
+                localStorage.removeItem('bm_overview_pending_v1');
+                localStorage.clear(); // Clear all cache
+                
+                document.getElementById('overviewLoading').style.display = 'block';
+                document.getElementById('overviewContent').style.display = 'none';
+
+                // Add cache-busting parameter to ensure fresh data
+                const timestamp = Date.now();
+                const randomParam = Math.random().toString(36).substring(7);
+                const response = await fetch(`/api/recommendations/overview?t=${timestamp}&r=${randomParam}&v=4&force=1`, {
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache',
+                        'Expires': '0'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Debug: Log the franchise data to see what's being received
+                console.log('🔍 Raw overview data received:', data);
+                
+                // Debug property owners
+                if (data.property_owners && data.property_owners.length > 0) {
+                    console.log('🏢 Property owners found:', data.property_owners.length);
+                    data.property_owners.forEach(owner => {
+                        console.log(`📋 Property Owner: ${owner.name}`);
+                        console.log(`   Location Valid: ${owner.location_valid}`);
+                        console.log(`   Matching Entrepreneurs: ${owner.matching_entrepreneurs?.length || 0}`);
+                        console.log(`   Matching Franchises: ${owner.matching_franchises?.length || 0}`);
+                        if (owner.matching_franchises && owner.matching_franchises.length > 0) {
+                            console.log('🏪 Property owner matching franchises:', owner.matching_franchises);
+                            console.log('🏪 First franchise match details:', owner.matching_franchises[0]);
+                        }
+                    });
+                } else {
+                    console.log('❌ No property owners found in data');
+                }
+                
+                if (data.entrepreneurs && data.entrepreneurs.length > 0) {
+                    data.entrepreneurs.forEach(entrepreneur => {
+                        if (entrepreneur.matching_franchises && entrepreneur.matching_franchises.length > 0) {
+                            console.log('🏢 Entrepreneur matching franchises:', entrepreneur.matching_franchises);
+                            entrepreneur.matching_franchises.forEach(match => {
+                                console.log('📧 Franchise contact data:', {
+                                    name: match.franchise.company_name,
+                                    email: match.franchise.email,
+                                    phone: match.franchise.phone
+                                });
+                            });
+                        }
+                    });
+                }
+                
+                // Store fresh data in cache
+                localStorage.setItem('bm_overview_recommendations_v1', JSON.stringify(data));
+                localStorage.setItem('bm_overview_recommendations_time_v1', String(timestamp));
+                
+                renderOverview(data);
+                setOverviewUpdatedText(timestamp);
+                
+                document.getElementById('overviewLoading').style.display = 'none';
+                document.getElementById('overviewContent').style.display = 'block';
+                
+                console.log('✅ Fresh overview data loaded successfully');
+            } catch (error) {
+                console.error('Error loading overview:', error);
+                document.getElementById('overviewLoading').innerHTML = '<p class="text-danger">Error loading recommendations</p>';
+            }
+        }
+
+        // Fill missing AI fields from cache (temporarily disabled to fix ReferenceError)
+        async function fillMissingAIFields() {
+            // This function is temporarily disabled to fix the fetchIncremental ReferenceError
+            // The main functionality will still work without this incremental loading
+            return;
+        }
+
+        // Load all properties
+        async function loadProperties() {
+            try {
+                const response = await fetch('/api/property-owners');
+                const properties = await response.json();
+                
+                let html = '<div class="row">';
+                properties.forEach(property => {
+                    html += '<div class="col-md-6 mb-4">';
+                    html += '<div class="card property-card">';
+                    html += '<div class="card-body">';
+                    html += `<h5 class="card-title"><i class="fas fa-building me-2"></i>${property.name}</h5>`;
+                    html += `<p class="card-text"><strong>Email:</strong> ${property.email || 'Not provided'}</p>`;
+                    html += `<p class="card-text"><strong>Phone:</strong> ${property.phone || 'Not provided'}</p>`;
+                    html += `<p class="card-text"><strong>Property Type:</strong> ${property.property_details?.property_type || 'N/A'}</p>`;
+                    html += `<p class="card-text"><strong>Size:</strong> ${property.property_details?.area_sqft || 'N/A'} sq ft</p>`;
+                    html += `<p class="card-text"><strong>Address:</strong> ${property.property_details?.address || 'N/A'}</p>`;
+                    
+                    // Safely handle location coordinates
+                    const location = property.property_details?.location;
+                    if (location && location.latitude && location.longitude) {
+                        html += `<p class="card-text"><strong>Coordinates:</strong> ${location.latitude}, ${location.longitude}</p>`;
+                    } else {
+                        html += `<p class="card-text"><strong>Coordinates:</strong> Not available</p>`;
+                    }
+                    html += '</div></div></div>';
+                });
+                html += '</div>';
+                
+                document.getElementById('propertiesContent').innerHTML = html;
+                document.getElementById('propertiesLoading').style.display = 'none';
+                document.getElementById('propertiesContent').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error loading properties:', error);
+            }
+        }
+
+        // Load all franchises
+        async function loadFranchises() {
+            try {
+                const response = await fetch('/api/franchise-companies');
+                const franchises = await response.json();
+                
+                let html = '<div class="row">';
+                franchises.forEach(franchise => {
+                    html += '<div class="col-md-6 mb-4">';
+                    html += '<div class="card franchise-card">';
+                    html += '<div class="card-body">';
+                    html += `<h5 class="card-title"><i class="fas fa-store me-2"></i>${franchise.company_name}</h5>`;
+                    html += `<p class="card-text"><strong>Email:</strong> ${franchise.email || 'Not provided'}</p>`;
+                    html += `<p class="card-text"><strong>Phone:</strong> ${franchise.phone || 'Not provided'}</p>`;
+                    html += `<p class="card-text"><strong>Category:</strong> ${franchise.franchise_requirements?.category || 'N/A'}</p>`;
+                    html += `<p class="card-text"><strong>Investment Required:</strong> ₹${franchise.franchise_requirements?.investment_required?.toLocaleString() || 'N/A'}</p>`;
+                    html += `<p class="card-text"><strong>Description:</strong> ${franchise.franchise_requirements?.description || 'N/A'}</p>`;
+                    html += '</div></div></div>';
+                });
+                html += '</div>';
+                
+                document.getElementById('franchisesContent').innerHTML = html;
+                document.getElementById('franchisesLoading').style.display = 'none';
+                document.getElementById('franchisesContent').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error loading franchises:', error);
+            }
+        }
+
+        // Load all entrepreneurs
+        async function loadEntrepreneurs() {
+            try {
+                const response = await fetch('/api/entrepreneurs');
+                const entrepreneurs = await response.json();
+                
+                let html = '<div class="row">';
+                entrepreneurs.forEach(entrepreneur => {
+                    html += '<div class="col-md-6 mb-4">';
+                    html += '<div class="card entrepreneur-card">';
+                    html += '<div class="card-body">';
+                    html += `<h5 class="card-title"><i class="fas fa-user-tie me-2"></i>${entrepreneur.name}</h5>`;
+                    html += `<p class="card-text"><strong>Email:</strong> ${entrepreneur.email || 'Not provided'}</p>`;
+                    html += `<p class="card-text"><strong>Phone:</strong> ${entrepreneur.phone || 'Not provided'}</p>`;
+                    html += `<p class="card-text"><strong>Type:</strong> ${entrepreneur.entrepreneur_type || 'N/A'}</p>`;
+                    html += `<p class="card-text"><strong>Budget:</strong> ₹${(entrepreneur.budget || 0).toLocaleString()}</p>`;
+                    html += `<p class="card-text"><strong>Pincode:</strong> ${entrepreneur.pincode || 'Not provided'}</p>`;
+                    if (entrepreneur.business_idea) {
+                        html += `<p class="card-text"><strong>Business Idea:</strong> ${entrepreneur.business_idea}</p>`;
+                    }
+                    html += '</div></div></div>';
+                });
+                html += '</div>';
+                
+                document.getElementById('entrepreneursContent').innerHTML = html;
+                document.getElementById('entrepreneursLoading').style.display = 'none';
+                document.getElementById('entrepreneursContent').style.display = 'block';
+                
+            } catch (error) {
+                console.error('Error loading entrepreneurs:', error);
+            }
+        }
+
+        // Tab change handlers
+        document.getElementById('properties-tab').addEventListener('click', loadProperties);
+        document.getElementById('franchises-tab').addEventListener('click', loadFranchises);
+        document.getElementById('entrepreneurs-tab').addEventListener('click', loadEntrepreneurs);
+
+        // Refresh button handler
+        document.getElementById('refreshOverviewBtn').addEventListener('click', async function() {
+            try {
+                // Clear all cache first
+                localStorage.removeItem('bm_overview_recommendations_v1');
+                localStorage.removeItem('bm_overview_recommendations_time_v1');
+                localStorage.removeItem('bm_overview_pending_v1');
+                
+                // Show loading state
+                document.getElementById('overviewLoading').style.display = 'block';
+                document.getElementById('overviewContent').style.display = 'none';
+                
+                // Force fresh data fetch
+                await loadOverview(true);
+                
+                // Update timestamp
+                setOverviewUpdatedText(Date.now());
+                
+                console.log('✅ AI data refreshed successfully');
+            } catch (error) {
+                console.error('❌ Error refreshing AI data:', error);
+                alert('Error refreshing AI data. Please try again.');
+            }
+        });
+
+        // Clear browser cache button handler
+        document.getElementById('clearCacheBtn').addEventListener('click', async function() {
+            try {
+                // Clear localStorage cache
+                localStorage.removeItem('bm_overview_recommendations_v1');
+                localStorage.removeItem('bm_overview_recommendations_time_v1');
+                localStorage.removeItem('bm_overview_pending_v1');
+                
+                // Call API to clear server cache too
+                await fetch('/api/clear-browser-cache', { method: 'POST' });
+                
+                // Show success message
+                alert('Browser cache cleared successfully! Please refresh the page.');
+                
+                // Reload the page to show fresh data
+                window.location.reload();
+            } catch (error) {
+                console.error('Error clearing cache:', error);
+                alert('Error clearing cache. Please try again.');
+            }
+        });
+
+
+
+        // When navigating here, render immediately from cache if available
+        document.addEventListener('visibilitychange', function(){
+            if (!document.hidden) {
+                const cached = readOverviewFromCache();
+                if (cached.data) {
+                    setOverviewUpdatedText(cached.ts);
+                    renderOverview(cached.data);
+                }
+                // Auto-consume pending new items queued by the home page
+                consumePendingAdds();
+            }
+        });
+
+        async function consumePendingAdds(){
+            try {
+                const pendKey = 'bm_overview_pending_v1';
+                const pendRaw = localStorage.getItem(pendKey);
+                if (!pendRaw) return;
+                const pending = JSON.parse(pendRaw);
+                if (!Array.isArray(pending) || pending.length===0) return;
+
+                const cacheKey = 'bm_overview_recommendations_v1';
+                const tsKey = 'bm_overview_recommendations_time_v1';
+                const raw = localStorage.getItem(cacheKey);
+                const data = raw ? JSON.parse(raw) : {property_owners:[],franchise_companies:[],entrepreneurs:[]};
+            } catch {}
+        }
+
+
+
+        // Contact Info Modal Function
+        function showContactInfo(name, email, phone, type, details) {
+            const modal = document.createElement('div');
+            modal.className = 'modal fade show';
+            modal.style.display = 'block';
+            modal.style.backgroundColor = 'rgba(0,0,0,0.7)';
+            modal.style.zIndex = '9999';
+            modal.innerHTML = `
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content" style="background: linear-gradient(135deg, #1a1a2e, #16213e); border: 2px solid #00d4ff; box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);">
+                        <div class="modal-header" style="border-bottom: 2px solid #00d4ff; background: linear-gradient(90deg, #00d4ff, #0099cc);">
+                            <h5 class="modal-title text-white fw-bold">
+                                <i class="fas fa-address-card me-2"></i>📞 CONTACT INFORMATION
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" onclick="this.closest('.modal').remove()"></button>
+                        </div>
+                        <div class="modal-body text-white p-4">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="text-center mb-4">
+                                        <h4 class="text-info fw-bold mb-2">${name}</h4>
+                                        <div class="badge bg-primary fs-6 mb-2">${type}</div>
+                                        <p class="text-light">${details}</p>
+                                    </div>
+                                    <hr style="border-color: #00d4ff; border-width: 2px;">
+                                    <div class="contact-details">
+                                        <div class="d-flex align-items-center mb-3 p-3" style="background: rgba(0, 212, 255, 0.1); border-radius: 10px; border-left: 4px solid #00d4ff;">
+                                            <i class="fas fa-envelope me-3 text-info fs-4"></i>
+                                            <div>
+                                                <strong class="text-info">Email Address:</strong><br>
+                                                <span class="fs-5">${email === 'N/A' ? '<span class="text-warning">Not provided</span>' : email}</span>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex align-items-center mb-3 p-3" style="background: rgba(0, 255, 127, 0.1); border-radius: 10px; border-left: 4px solid #00ff7f;">
+                                            <i class="fas fa-phone me-3 text-success fs-4"></i>
+                                            <div>
+                                                <strong class="text-success">Phone Number:</strong><br>
+                                                <span class="fs-5">${phone === 'N/A' ? '<span class="text-warning">Not provided</span>' : phone}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer" style="border-top: 2px solid #00d4ff; background: rgba(0, 212, 255, 0.1);">
+                            <button type="button" class="btn btn-secondary" onclick="this.closest('.modal').remove()">
+                                <i class="fas fa-times me-1"></i>Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // Close modal when clicking outside
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+
+        // Run once on load
+        consumePendingAdds();
+
+        // Load initial data
+        loadStats();
+        // Try to render from cache immediately; fetch only if not present or user refreshes
+        const initialCache = readOverviewFromCache();
+        if (initialCache.data) {
+            setOverviewUpdatedText(initialCache.ts);
+            renderOverview(initialCache.data);
+        } else {
+            loadOverview();
+        }
+    </script>
+</body>
+</html>

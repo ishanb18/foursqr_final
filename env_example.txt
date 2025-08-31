@@ -1,0 +1,10 @@
+# Foursquare API Configuration
+# Get your Service Key from: https://developer.foursquare.com/console
+FOURSQUARE_SERVICE_KEY=your_foursquare_service_key_here
+
+# Mistral AI Configuration
+# Get your API key from: https://console.mistral.ai/
+MISTRAL_API_KEY=your_mistral_api_key_here
+
+# Application Settings
+DEBUG=True
