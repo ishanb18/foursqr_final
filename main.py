@@ -1067,7 +1067,7 @@ async def overview_property_owner_post(owner: PropertyOwner):
                         matching_entrepreneurs.append({
                             "entrepreneur": entrepreneur.model_dump(),
                             "match_score": match_score,
-                            "reasoning": f"Budget compatible (₹{entrepreneur_budget:,.0f}), {entrepreneur.entrepreneur_type} type, estimated property value ₹{estimated_value:,.0f}"
+                            "reasoning": f"Budget compatible (₹{(entrepreneur_budget or 0):,.0f}), {entrepreneur.entrepreneur_type} type, estimated property value ₹{(estimated_value or 0):,.0f}"
                         })
             
             # Find matching franchises
@@ -1423,9 +1423,17 @@ async def get_recommendations_overview(t: Optional[int] = None):
                             LocationData(**location_data_dict)
                         )
                         
+                        # Safely convert market insights to dict with None handling
+                        market_insights_dict = market_insights.model_dump()
+                        # Ensure all numeric fields are properly handled
+                        if market_insights_dict.get('average_rent') is None:
+                            market_insights_dict['average_rent'] = 50000  # Default value
+                        if market_insights_dict.get('foot_traffic_score') is None:
+                            market_insights_dict['foot_traffic_score'] = 0.0
+                        
                         # Get AI-powered property analysis
                         ai_analysis = ai_service.analyze_property_market(
-                            property_owner, market_insights.model_dump()
+                            property_owner, market_insights_dict
                         )
                         
                         print(f"✅ Overview analysis for {property_owner.name} in {location.get('city', 'Unknown')}")
@@ -1653,6 +1661,7 @@ async def get_recommendations_overview(t: Optional[int] = None):
                 
                 # Find matching properties with location intelligence
                 matching_properties = []
+                print(f"🔍 Looking for property matches for entrepreneur {entrepreneur.name} (budget: ₹{entrepreneur.budget})")
                 for prop_owner in property_owners.values():
                     prop_location = prop_owner.property_details.get("location", {})
                     prop_size = prop_owner.property_details.get("area_sqft", 0)
@@ -1673,41 +1682,55 @@ async def get_recommendations_overview(t: Optional[int] = None):
                                 "pincode": prop_location.get("pincode")
                             }
                             
-                            market_insights = foursquare_api.analyze_market_insights(
-                                LocationData(**location_data_dict)
-                            )
-                            
-                            # Use AI analysis for property valuation
-                            ai_analysis = ai_service.analyze_property_market(
-                                prop_owner, market_insights.model_dump()
-                            )
-                            
-                            # Calculate estimated value based on AI insights and market data
-                            base_value = prop_size * 10000  # Base ₹10,000 per sq ft
-                            
-                            # Adjust based on market competition
-                            if market_insights.competition_level == "Low":
-                                competition_multiplier = 0.8
-                            elif market_insights.competition_level == "Medium":
-                                competition_multiplier = 1.0
-                            else:  # High competition
-                                competition_multiplier = 1.3
-                            
-                            # Adjust based on foot traffic
-                            foot_traffic_score = market_insights.foot_traffic_score or 0.0
-                            foot_traffic_multiplier = 1 + (foot_traffic_score * 0.5)
-                            
-                            # Use rent/price data if available
-                            current_rent = prop_owner.property_details.get("current_rent")
-                            asking_price = prop_owner.property_details.get("asking_price")
-                            
-                            if current_rent:
-                                rent_based_value = current_rent * 12 * 20  # 20x annual rent
-                                estimated_property_value = max(base_value * competition_multiplier * foot_traffic_multiplier, rent_based_value)
-                            elif asking_price:
-                                estimated_property_value = asking_price
-                            else:
-                                estimated_property_value = base_value * competition_multiplier * foot_traffic_multiplier
+                            try:
+                                market_insights = foursquare_api.analyze_market_insights(
+                                    LocationData(**location_data_dict)
+                                )
+                                
+                                # Safely convert market insights to dict with None handling
+                                market_insights_dict = market_insights.model_dump()
+                                # Ensure all numeric fields are properly handled
+                                if market_insights_dict.get('average_rent') is None:
+                                    market_insights_dict['average_rent'] = 50000  # Default value
+                                if market_insights_dict.get('foot_traffic_score') is None:
+                                    market_insights_dict['foot_traffic_score'] = 0.0
+                                
+                                # Use AI analysis for property valuation
+                                ai_analysis = ai_service.analyze_property_market(
+                                    prop_owner, market_insights_dict
+                                )
+                                
+                                # Calculate estimated value based on AI insights and market data
+                                base_value = prop_size * 10000  # Base ₹10,000 per sq ft
+                                
+                                # Adjust based on market competition
+                                competition_level = getattr(market_insights, 'competition_level', 'Medium')
+                                if competition_level == "Low":
+                                    competition_multiplier = 0.8
+                                elif competition_level == "Medium":
+                                    competition_multiplier = 1.0
+                                else:  # High competition
+                                    competition_multiplier = 1.3
+                                
+                                # Adjust based on foot traffic
+                                foot_traffic_score = getattr(market_insights, 'foot_traffic_score', 0.0) or 0.0
+                                foot_traffic_multiplier = 1 + (foot_traffic_score * 0.5)
+                                
+                                # Use rent/price data if available
+                                current_rent = prop_owner.property_details.get("current_rent")
+                                asking_price = prop_owner.property_details.get("asking_price")
+                                
+                                if current_rent:
+                                    rent_based_value = current_rent * 12 * 20  # 20x annual rent
+                                    estimated_property_value = max(base_value * competition_multiplier * foot_traffic_multiplier, rent_based_value)
+                                elif asking_price:
+                                    estimated_property_value = asking_price
+                                else:
+                                    estimated_property_value = base_value * competition_multiplier * foot_traffic_multiplier
+                            except Exception as e:
+                                print(f"Error getting market insights for {prop_owner.name}: {e}")
+                                # Fallback to basic calculation if market insights fail
+                                estimated_property_value = prop_size * 10000
                         else:
                             # Fallback to basic calculation if no location data
                             estimated_property_value = prop_size * 10000
@@ -1723,7 +1746,17 @@ async def get_recommendations_overview(t: Optional[int] = None):
                     except (ValueError, TypeError):
                         entrepreneur_budget = 0
                     
-                    if entrepreneur_budget >= estimated_property_value * 0.15:  # 15% down payment (same as property owner matching)
+                    # Safely format the values for printing
+                    try:
+                        estimated_value_str = f"₹{estimated_property_value:,.0f}" if estimated_property_value is not None else "₹0"
+                        budget_str = f"₹{entrepreneur_budget:,.0f}" if entrepreneur_budget is not None else "₹0"
+                    except (ValueError, TypeError):
+                        estimated_value_str = f"₹{estimated_property_value}" if estimated_property_value is not None else "₹0"
+                        budget_str = f"₹{entrepreneur_budget}" if entrepreneur_budget is not None else "₹0"
+                    
+                    print(f"  📊 Property: {prop_owner.name} - Estimated value: {estimated_value_str}, Entrepreneur budget: {budget_str}")
+                    # More flexible matching - lower threshold for better matches
+                    if entrepreneur_budget >= estimated_property_value * 0.05:  # 5% down payment (more inclusive)
                         # Get nearby businesses using Foursquare API
                         try:
                             # Only search if we have valid coordinates
@@ -1807,6 +1840,7 @@ async def get_recommendations_overview(t: Optional[int] = None):
                                     except (ValueError, TypeError):
                                         pass
                             
+                            print(f"    ✅ Match found! Score: {match_score:.2f}")
                             matching_properties.append({
                                 "property_owner": {
                                     "name": prop_owner.name,
@@ -1836,6 +1870,7 @@ async def get_recommendations_overview(t: Optional[int] = None):
                 
                 # Find matching franchises with location analysis
                 matching_franchises = []
+                print(f"🔍 Looking for franchise matches for entrepreneur {entrepreneur.name} (budget: ₹{entrepreneur.budget})")
                 for franchise in franchise_companies.values():
                     franchise_investment = franchise.franchise_requirements.get("investment_required", 0)
                     franchise_category = franchise.franchise_requirements.get("category", "")
@@ -1862,6 +1897,7 @@ async def get_recommendations_overview(t: Optional[int] = None):
                         if entrepreneur_budget >= franchise_investment * 1.5:
                             match_score += 0.2  # Extra budget for operations
                         
+                        print(f"    ✅ Franchise match found! Score: {match_score:.2f}")
                         matching_franchises.append({
                             "franchise": {
                                 "company_name": franchise.company_name,
@@ -1876,6 +1912,8 @@ async def get_recommendations_overview(t: Optional[int] = None):
                 # Sort by match score
                 matching_properties.sort(key=lambda x: x["match_score"], reverse=True)
                 matching_franchises.sort(key=lambda x: x["match_score"], reverse=True)
+                
+                print(f"📊 Summary for {entrepreneur.name}: {len(matching_properties)} property matches, {len(matching_franchises)} franchise matches")
                 
                 recommendations["entrepreneurs"].append({
                     "user_id": user_id,

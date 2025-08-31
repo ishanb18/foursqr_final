@@ -99,7 +99,7 @@ class AIService:
         - {price_info}
 
         MARKET DATA:
-        - Average Market Rent: ₹{market_rent:,.0f}
+        - Average Market Rent: ₹{(market_rent or 0):,.0f}
         - Competition Level: {competition_level}
         - Foot Traffic Score: {(foot_traffic or 0.0):.2f}
         - Total Nearby Businesses: {total_businesses}
@@ -109,19 +109,19 @@ class AIService:
         {{
             "pricing_strategy": "Specific pricing recommendations based on {prop_type} property in {prop_location.get('city', 'this location')} with {competition_level} competition. Include exact rent/sale price ranges based on market data.",
             "rent_analysis": {{
-                "current_rent": "₹{current_rent or 0:,.0f}",
-                "market_average": "₹{market_rent:,.0f}",
+                "current_rent": "₹{(current_rent or 0):,.0f}",
+                "market_average": "₹{(market_rent or 0):,.0f}",
                 "recommendation": "Detailed rent analysis for {prop_size} sq ft {prop_type} property. Compare current rent with market average and provide specific recommendations for rent optimization."
             }},
             "price_analysis": {{
-                "current_price": "₹{asking_price or 0:,.0f} (Not for sale)" if not asking_price else "₹{asking_price:,.0f}",
-                "market_value_estimate": "Based on market rent of ₹{market_rent:,.0f} for 20 years, estimated value: ₹{market_rent * 12 * 20:,.0f}",
+                "current_price": "₹{(asking_price or 0):,.0f} (Not for sale)" if not asking_price else "₹{(asking_price or 0):,.0f}",
+                                                "market_value_estimate": "Based on market rent of ₹{(market_rent or 0):,.0f} for 20 years, estimated value: ₹{(market_rent or 0) * 12 * 20:,.0f}",
                 "recommendation": "Sale price analysis considering {prop_size} sq ft {prop_type} property. Include market value assessment and pricing strategy."
             }},
             "target_franchises": ["List 3-5 specific franchise types that would work well in this {prop_type} property based on {demand_categories} demand"],
             "target_entrepreneurs": ["List 3-5 specific entrepreneur types who would find this {prop_type} property attractive based on size, location, and market conditions"],
             "positioning_advice": "Specific positioning strategy for {prop_type} property in {prop_location.get('city', 'this area')} with {competition_level} competition and {(foot_traffic or 0.0):.2f} foot traffic score",
-            "investment_potential": "Detailed ROI analysis for {prop_size} sq ft {prop_type} property. Include specific investment potential based on market rent (₹{market_rent:,.0f}), competition ({competition_level}), and location factors"
+                                            "investment_potential": "Detailed ROI analysis for {prop_size} sq ft {prop_type} property. Include specific investment potential based on market rent (₹{(market_rent or 0):,.0f}), competition ({competition_level}), and location factors"
         }}
 
         CRITICAL: Use the actual numbers and data provided above. Do not use generic values. Provide specific, actionable insights based on the real market data. Return ONLY valid JSON with proper quotes around all string values.
@@ -172,18 +172,18 @@ class AIService:
                         "pricing_strategy": f"Based on {prop_type} property ({prop_size} sq ft) in {competition_level} competition area. Recommended rent: ₹{estimated_rent:,.0f}/month, Sale price: ₹{estimated_sale_price:,.0f}",
                         "rent_analysis": {
                             "current_rent": f"₹{(current_rent or 0):,.0f}",
-                            "market_average": f"₹{market_rent:,.0f}",
-                            "recommendation": f"Market average rent: ₹{market_rent:,.0f}. For {prop_size} sq ft {prop_type} property, recommended rent range: ₹{estimated_rent * 0.8:,.0f} - ₹{estimated_rent * 1.2:,.0f}/month"
+                            "market_average": f"₹{(market_rent or 0):,.0f}",
+                            "recommendation": f"Market average rent: ₹{(market_rent or 0):,.0f}. For {prop_size} sq ft {prop_type} property, recommended rent range: ₹{estimated_rent * 0.8:,.0f} - ₹{estimated_rent * 1.2:,.0f}/month"
                         },
                         "price_analysis": {
                             "current_price": f"₹{(asking_price or 0):,.0f} (Not for sale)" if not asking_price else f"₹{asking_price:,.0f}",
-                            "market_value_estimate": f"Based on market rent of ₹{market_rent:,.0f} for 20 years, estimated value: ₹{estimated_sale_price:,.0f}",
+                            "market_value_estimate": f"Based on market rent of ₹{(market_rent or 0):,.0f} for 20 years, estimated value: ₹{estimated_sale_price:,.0f}",
                             "recommendation": f"Estimated market value for {prop_size} sq ft {prop_type} property: ₹{estimated_sale_price:,.0f} based on {competition_level} competition and market rent data"
                         },
                         "target_franchises": ["Retail franchises", "Service businesses", "Food & beverage", "Healthcare services", "Educational centers"],
                         "target_entrepreneurs": ["Small business owners", "Service providers", "Retail entrepreneurs", "Healthcare professionals", "Educational institutions"],
                         "positioning_advice": f"Position as premium {prop_type} space in {competition_level} competition market. Highlight {prop_size} sq ft size and location advantages",
-                        "investment_potential": f"ROI potential: 8-12% based on {market_rent:,.0f} market rent. {prop_size} sq ft {prop_type} property suitable for long-term investment"
+                        "investment_potential": f"ROI potential: 8-12% based on {(market_rent or 0):,.0f} market rent. {prop_size} sq ft {prop_type} property suitable for long-term investment"
                     }
             
             return result
@@ -203,18 +203,18 @@ class AIService:
                 "pricing_strategy": f"Based on {prop_type} property ({prop_size} sq ft) in {competition_level} competition area. Recommended rent: ₹{estimated_rent:,.0f}/month, Sale price: ₹{estimated_sale_price:,.0f}",
                 "rent_analysis": {
                     "current_rent": f"₹{(current_rent or 0):,.0f}",
-                    "market_average": f"₹{market_rent:,.0f}",
-                    "recommendation": f"Market average rent: ₹{market_rent:,.0f}. For {prop_size} sq ft {prop_type} property, recommended rent range: ₹{estimated_rent * 0.8:,.0f} - ₹{estimated_rent * 1.2:,.0f}/month"
+                    "market_average": f"₹{(market_rent or 0):,.0f}",
+                    "recommendation": f"Market average rent: ₹{(market_rent or 0):,.0f}. For {prop_size} sq ft {prop_type} property, recommended rent range: ₹{estimated_rent * 0.8:,.0f} - ₹{estimated_rent * 1.2:,.0f}/month"
                 },
                 "price_analysis": {
                     "current_price": f"₹{(asking_price or 0):,.0f} (Not for sale)" if not asking_price else f"₹{asking_price:,.0f}",
-                    "market_value_estimate": f"Based on market rent of ₹{market_rent:,.0f} for 20 years, estimated value: ₹{estimated_sale_price:,.0f}",
+                    "market_value_estimate": f"Based on market rent of ₹{(market_rent or 0):,.0f} for 20 years, estimated value: ₹{estimated_sale_price:,.0f}",
                     "recommendation": f"Estimated market value for {prop_size} sq ft {prop_type} property: ₹{estimated_sale_price:,.0f} based on {competition_level} competition and market rent data"
                 },
                 "target_franchises": ["Retail franchises", "Service businesses", "Food & beverage", "Healthcare services", "Educational centers"],
                 "target_entrepreneurs": ["Small business owners", "Service providers", "Retail entrepreneurs", "Healthcare professionals", "Educational institutions"],
                 "positioning_advice": f"Position as premium {prop_type} space in {competition_level} competition market. Highlight {prop_size} sq ft size and location advantages",
-                "investment_potential": f"ROI potential: 8-12% based on {market_rent:,.0f} market rent. {prop_size} sq ft {prop_type} property suitable for long-term investment"
+                "investment_potential": f"ROI potential: 8-12% based on {(market_rent or 0):,.0f} market rent. {prop_size} sq ft {prop_type} property suitable for long-term investment"
             }
 
     def match_property_with_franchise(self, property_owner: PropertyOwner, 

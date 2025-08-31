@@ -1,476 +1,412 @@
+#!/usr/bin/env python3
+"""
+Sample Data Population Script for Match Square
+This script populates the application with sample data for testing matching functionality.
+"""
+
 import requests
 import json
 import time
-from typing import List, Dict, Any
 
-# Base URL for the API
 BASE_URL = "http://localhost:8000"
 
-def add_property_owners():
-    """Add sample property owners"""
-    print("🏢 Adding Property Owners...")
+def register_property_owner(name, email, phone, property_type, area_sqft, current_rent, pincode, address, asking_price=None):
+    """Register a property owner"""
+    data = {
+        "name": name,
+        "email": email,
+        "phone": phone,
+        "property_details": {
+            "property_type": property_type,
+            "area_sqft": area_sqft,
+            "current_rent": current_rent,
+            "pincode": pincode,
+            "address": address,
+            "asking_price": asking_price,
+            "location": {
+                "latitude": 12.9716,  # Bangalore coordinates
+                "longitude": 77.5946,
+                "address": address,
+                "city": "Bangalore",
+                "state": "Karnataka",
+                "country": "India",
+                "pincode": pincode
+            }
+        }
+    }
     
+    response = requests.post(f"{BASE_URL}/api/users/property-owner", json=data)
+    if response.status_code == 200:
+        print(f"✅ Property Owner '{name}' registered successfully")
+        return response.json()
+    else:
+        print(f"❌ Failed to register Property Owner '{name}': {response.text}")
+        return None
+
+def register_franchise_company(company_name, email, phone, category, investment_required, area_size, pincode):
+    """Register a franchise company"""
+    data = {
+        "company_name": company_name,
+        "email": email,
+        "phone": phone,
+        "franchise_requirements": {
+            "category": category,
+            "investment_required": investment_required,
+            "area_size": area_size,
+            "pincode": pincode,
+            "description": f"Great {category} franchise opportunity",
+            "location_description": f"Prime location in {pincode}"
+        }
+    }
+    
+    response = requests.post(f"{BASE_URL}/api/users/franchise-company", json=data)
+    if response.status_code == 200:
+        print(f"✅ Franchise Company '{company_name}' registered successfully")
+        return response.json()
+    else:
+        print(f"❌ Failed to register Franchise Company '{company_name}': {response.text}")
+        return None
+
+def register_entrepreneur(name, email, phone, entrepreneur_type, budget, pincode, business_idea=None):
+    """Register an entrepreneur"""
+    data = {
+        "name": name,
+        "email": email,
+        "phone": phone,
+        "entrepreneur_type": entrepreneur_type,
+        "budget": budget,
+        "pincode": pincode,
+        "business_idea": business_idea or f"Looking for {entrepreneur_type} opportunities"
+    }
+    
+    response = requests.post(f"{BASE_URL}/api/users/entrepreneur", json=data)
+    if response.status_code == 200:
+        print(f"✅ Entrepreneur '{name}' registered successfully")
+        return response.json()
+    else:
+        print(f"❌ Failed to register Entrepreneur '{name}': {response.text}")
+        return None
+
+def main():
+    print("🚀 Populating Match Square with comprehensive sample data...")
+    print("=" * 60)
+    
+    # Property Owners (with diverse properties for better matching)
+    print("\n🏢 Registering Property Owners...")
     property_owners = [
         {
             "name": "Rajesh Kumar",
-            "email": "rajesh.kumar@email.com",
+            "email": "rajesh@example.com",
             "phone": "9876543210",
-            "property_details": {
-                "type": "Commercial Space",
-                "size": 1500,
-                "price": 25000,
-                "location": {
-                    "address": "Connaught Place, New Delhi",
-                    "latitude": 28.6328,
-                    "longitude": 77.2198,
-                    "city": "New Delhi",
-                    "state": "Delhi",
-                    "country": "India"
-                }
-            }
+            "property_type": "retail",
+            "area_sqft": 800,
+            "current_rent": 25000,
+            "pincode": "560001",
+            "address": "MG Road, Bangalore",
+            "asking_price": 8000000
         },
         {
             "name": "Priya Sharma",
-            "email": "priya.sharma@email.com",
+            "email": "priya@example.com",
             "phone": "9876543211",
-            "property_details": {
-                "type": "Retail Shop",
-                "size": 800,
-                "price": 18000,
-                "location": {
-                    "address": "Bandra West, Mumbai",
-                    "latitude": 19.0596,
-                    "longitude": 72.8295,
-                    "city": "Mumbai",
-                    "state": "Maharashtra",
-                    "country": "India"
-                }
-            }
+            "property_type": "commercial",
+            "area_sqft": 1200,
+            "current_rent": 35000,
+            "pincode": "560002",
+            "address": "Commercial Street, Bangalore",
+            "asking_price": 12000000
         },
         {
             "name": "Amit Patel",
-            "email": "amit.patel@email.com",
+            "email": "amit@example.com",
             "phone": "9876543212",
-            "property_details": {
-                "type": "Office Space",
-                "size": 2000,
-                "price": 35000,
-                "location": {
-                    "address": "Koramangala, Bangalore",
-                    "latitude": 12.9349,
-                    "longitude": 77.6050,
-                    "city": "Bangalore",
-                    "state": "Karnataka",
-                    "country": "India"
-                }
-            }
+            "property_type": "office",
+            "area_sqft": 1500,
+            "current_rent": 40000,
+            "pincode": "560003",
+            "address": "Koramangala, Bangalore",
+            "asking_price": 15000000
         },
         {
-            "name": "Sneha Reddy",
-            "email": "sneha.reddy@email.com",
+            "name": "Deepak Verma",
+            "email": "deepak@example.com",
             "phone": "9876543213",
-            "property_details": {
-                "type": "Restaurant Space",
-                "size": 1200,
-                "price": 22000,
-                "location": {
-                    "address": "T Nagar, Chennai",
-                    "latitude": 13.0827,
-                    "longitude": 80.2707,
-                    "city": "Chennai",
-                    "state": "Tamil Nadu",
-                    "country": "India"
-                }
-            }
+            "property_type": "restaurant",
+            "area_sqft": 1000,
+            "current_rent": 30000,
+            "pincode": "560004",
+            "address": "Indiranagar, Bangalore",
+            "asking_price": 10000000
+        },
+        {
+            "name": "Meera Iyer",
+            "email": "meera@example.com",
+            "phone": "9876543214",
+            "property_type": "retail",
+            "area_sqft": 600,
+            "current_rent": 20000,
+            "pincode": "560005",
+            "address": "JP Nagar, Bangalore",
+            "asking_price": 6000000
         },
         {
             "name": "Vikram Singh",
-            "email": "vikram.singh@email.com",
-            "phone": "9876543214",
-            "property_details": {
-                "type": "Warehouse",
-                "size": 5000,
-                "price": 45000,
-                "location": {
-                    "address": "Gurgaon, Haryana",
-                    "latitude": 28.4595,
-                    "longitude": 77.0266,
-                    "city": "Gurgaon",
-                    "state": "Haryana",
-                    "country": "India"
-                }
-            }
+            "email": "vikram@example.com",
+            "phone": "9876543215",
+            "property_type": "commercial",
+            "area_sqft": 2000,
+            "current_rent": 50000,
+            "pincode": "560006",
+            "address": "Whitefield, Bangalore",
+            "asking_price": 20000000
         },
         {
             "name": "Anjali Desai",
-            "email": "anjali.desai@email.com",
-            "phone": "9876543215",
-            "property_details": {
-                "type": "Boutique Space",
-                "size": 600,
-                "price": 15000,
-                "location": {
-                    "address": "Jubilee Hills, Hyderabad",
-                    "latitude": 17.4065,
-                    "longitude": 78.4772,
-                    "city": "Hyderabad",
-                    "state": "Telangana",
-                    "country": "India"
-                }
-            }
-        },
-        {
-            "name": "Rahul Verma",
-            "email": "rahul.verma@email.com",
+            "email": "anjali@example.com",
             "phone": "9876543216",
-            "property_details": {
-                "type": "Gym Space",
-                "size": 1000,
-                "price": 20000,
-                "location": {
-                    "address": "Salt Lake, Kolkata",
-                    "latitude": 22.5726,
-                    "longitude": 88.3639,
-                    "city": "Kolkata",
-                    "state": "West Bengal",
-                    "country": "India"
-                }
-            }
+            "property_type": "office",
+            "area_sqft": 800,
+            "current_rent": 25000,
+            "pincode": "560007",
+            "address": "Electronic City, Bangalore",
+            "asking_price": 8000000
         },
         {
-            "name": "Meera Iyer",
-            "email": "meera.iyer@email.com",
+            "name": "Rahul Gupta",
+            "email": "rahul@example.com",
             "phone": "9876543217",
-            "property_details": {
-                "type": "Spa Center",
-                "size": 900,
-                "price": 18000,
-                "location": {
-                    "address": "Vasant Vihar, Delhi",
-                    "latitude": 28.5562,
-                    "longitude": 77.1000,
-                    "city": "Delhi",
-                    "state": "Delhi",
-                    "country": "India"
-                }
-            }
-        },
-        {
-            "name": "Karan Malhotra",
-            "email": "karan.malhotra@email.com",
-            "phone": "9876543218",
-            "property_details": {
-                "type": "Tech Startup Space",
-                "size": 1500,
-                "price": 28000,
-                "location": {
-                    "address": "Hinjewadi, Pune",
-                    "latitude": 18.5204,
-                    "longitude": 73.8567,
-                    "city": "Pune",
-                    "state": "Maharashtra",
-                    "country": "India"
-                }
-            }
-        },
-        {
-            "name": "Divya Gupta",
-            "email": "divya.gupta@email.com",
-            "phone": "9876543219",
-            "property_details": {
-                "type": "Café Space",
-                "size": 700,
-                "price": 16000,
-                "location": {
-                    "address": "Indiranagar, Bangalore",
-                    "latitude": 12.9716,
-                    "longitude": 77.5946,
-                    "city": "Bangalore",
-                    "state": "Karnataka",
-                    "country": "India"
-                }
-            }
+            "property_type": "retail",
+            "area_sqft": 1200,
+            "current_rent": 35000,
+            "pincode": "560008",
+            "address": "Marathahalli, Bangalore",
+            "asking_price": 12000000
         }
     ]
     
-    for i, owner in enumerate(property_owners, 1):
-        try:
-            response = requests.post(f"{BASE_URL}/api/users/property-owner", json=owner)
-            if response.status_code == 200:
-                print(f"✅ Property Owner {i}: {owner['name']} - {owner['property_details']['type']}")
-            else:
-                print(f"❌ Failed to add Property Owner {i}: {response.status_code}")
-        except Exception as e:
-            print(f"❌ Error adding Property Owner {i}: {e}")
-        time.sleep(0.5)
-
-def add_franchise_companies():
-    """Add sample franchise companies"""
-    print("\n🏪 Adding Franchise Companies...")
+    for owner in property_owners:
+        register_property_owner(**owner)
+        time.sleep(0.5)  # Small delay between requests
     
+    # Franchise Companies (with diverse investment requirements)
+    print("\n🏪 Registering Franchise Companies...")
     franchise_companies = [
         {
-            "company_name": "Coffee Corner Express",
-            "email": "info@coffeecorner.com",
+            "company_name": "Quick Bites",
+            "email": "info@quickbites.com",
             "phone": "9876543220",
-            "franchise_requirements": {
-                "category": "Food & Beverage",
-                "investment_required": 500000,
-                "area_size": 800,
-                "description": "Premium coffee shop franchise with modern ambiance"
-            }
+            "category": "food_beverage",
+            "investment_required": 500000,
+            "area_size": 800,
+            "pincode": "560001"
         },
         {
-            "company_name": "FitLife Gym",
-            "email": "franchise@fitlife.com",
+            "company_name": "Tech Solutions",
+            "email": "info@techsolutions.com",
             "phone": "9876543221",
-            "franchise_requirements": {
-                "category": "Health & Fitness",
-                "investment_required": 800000,
-                "area_size": 1500,
-                "description": "Modern fitness center with latest equipment"
-            }
+            "category": "services",
+            "investment_required": 300000,
+            "area_size": 600,
+            "pincode": "560002"
         },
         {
-            "company_name": "TechTutors Academy",
-            "email": "franchise@techtutors.com",
+            "company_name": "Fashion Hub",
+            "email": "info@fashionhub.com",
             "phone": "9876543222",
-            "franchise_requirements": {
-                "category": "Education",
-                "investment_required": 300000,
-                "area_size": 1000,
-                "description": "Coding and technology education for kids and adults"
-            }
+            "category": "retail",
+            "investment_required": 800000,
+            "area_size": 1000,
+            "pincode": "560003"
         },
         {
-            "company_name": "BeautyBliss Salon",
-            "email": "franchise@beautybliss.com",
+            "company_name": "Coffee Corner",
+            "email": "info@coffeecorner.com",
             "phone": "9876543223",
-            "franchise_requirements": {
-                "category": "Beauty & Wellness",
-                "investment_required": 400000,
-                "area_size": 600,
-                "description": "Premium beauty salon and spa services"
-            }
+            "category": "food_beverage",
+            "investment_required": 400000,
+            "area_size": 500,
+            "pincode": "560004"
         },
         {
-            "company_name": "QuickBite Restaurant",
-            "email": "franchise@quickbite.com",
+            "company_name": "Beauty Salon",
+            "email": "info@beautysalon.com",
             "phone": "9876543224",
-            "franchise_requirements": {
-                "category": "Food & Beverage",
-                "investment_required": 600000,
-                "area_size": 1200,
-                "description": "Fast-casual restaurant serving healthy meals"
-            }
+            "category": "services",
+            "investment_required": 250000,
+            "area_size": 400,
+            "pincode": "560005"
         },
         {
-            "company_name": "EduSmart Learning",
-            "email": "franchise@edusmart.com",
+            "company_name": "Gym Fitness",
+            "email": "info@gymfitness.com",
             "phone": "9876543225",
-            "franchise_requirements": {
-                "category": "Education",
-                "investment_required": 250000,
-                "area_size": 800,
-                "description": "After-school tutoring and skill development"
-            }
+            "category": "healthcare",
+            "investment_required": 1000000,
+            "area_size": 1500,
+            "pincode": "560006"
         },
         {
-            "company_name": "GreenMart Grocery",
-            "email": "franchise@greenmart.com",
+            "company_name": "Mobile Store",
+            "email": "info@mobilestore.com",
             "phone": "9876543226",
-            "franchise_requirements": {
-                "category": "Retail",
-                "investment_required": 700000,
-                "area_size": 2000,
-                "description": "Organic and healthy grocery store"
-            }
+            "category": "retail",
+            "investment_required": 600000,
+            "area_size": 800,
+            "pincode": "560007"
         },
         {
-            "company_name": "PetCare Plus",
-            "email": "franchise@petcare.com",
+            "company_name": "Tutoring Center",
+            "email": "info@tutoringcenter.com",
             "phone": "9876543227",
-            "franchise_requirements": {
-                "category": "Pet Services",
-                "investment_required": 350000,
-                "area_size": 900,
-                "description": "Pet grooming, daycare, and veterinary services"
-            }
+            "category": "education",
+            "investment_required": 200000,
+            "area_size": 600,
+            "pincode": "560008"
         },
         {
-            "company_name": "CleanPro Services",
-            "email": "franchise@cleanpro.com",
+            "company_name": "Pharmacy Plus",
+            "email": "info@pharmacyplus.com",
             "phone": "9876543228",
-            "franchise_requirements": {
-                "category": "Services",
-                "investment_required": 200000,
-                "area_size": 500,
-                "description": "Professional cleaning and maintenance services"
-            }
+            "category": "healthcare",
+            "investment_required": 700000,
+            "area_size": 700,
+            "pincode": "560001"
         },
         {
-            "company_name": "FashionForward",
-            "email": "franchise@fashionforward.com",
+            "company_name": "Bakery Delight",
+            "email": "info@bakerydelight.com",
             "phone": "9876543229",
-            "franchise_requirements": {
-                "category": "Retail",
-                "investment_required": 450000,
-                "area_size": 1000,
-                "description": "Trendy fashion boutique for young adults"
-            }
+            "category": "food_beverage",
+            "investment_required": 350000,
+            "area_size": 600,
+            "pincode": "560002"
         }
     ]
     
-    for i, franchise in enumerate(franchise_companies, 1):
-        try:
-            response = requests.post(f"{BASE_URL}/api/users/franchise-company", json=franchise)
-            if response.status_code == 200:
-                print(f"✅ Franchise Company {i}: {franchise['company_name']} - {franchise['franchise_requirements']['category']}")
-            else:
-                print(f"❌ Failed to add Franchise Company {i}: {response.status_code}")
-        except Exception as e:
-            print(f"❌ Error adding Franchise Company {i}: {e}")
+    for franchise in franchise_companies:
+        register_franchise_company(**franchise)
         time.sleep(0.5)
-
-def add_entrepreneurs():
-    """Add sample entrepreneurs"""
-    print("\n👨‍💼 Adding Entrepreneurs...")
     
+    # Entrepreneurs (with diverse budgets and types)
+    print("\n👤 Registering Entrepreneurs...")
     entrepreneurs = [
         {
-            "name": "Arjun Mehta",
-            "email": "arjun.mehta@email.com",
+            "name": "Naveen Kumar",
+            "email": "naveen@example.com",
             "phone": "9876543230",
             "entrepreneur_type": "investor",
-            "budget": 1000000,
-            "pincode": "400001",
-            "business_idea": "Tech startup in fintech space"
+            "budget": 1200000,
+            "pincode": "560001",
+            "business_idea": "Looking for food franchise opportunities"
         },
         {
-            "name": "Priya Reddy",
-            "email": "priya.reddy@email.com",
+            "name": "Sneha Reddy",
+            "email": "sneha@example.com",
             "phone": "9876543231",
             "entrepreneur_type": "idea_owner",
-            "budget": 500000,
-            "pincode": "110001",
-            "business_idea": "Organic food delivery service"
-        },
-        {
-            "name": "Rahul Sharma",
-            "email": "rahul.sharma@email.com",
-            "phone": "9876543232",
-            "entrepreneur_type": "both",
-            "budget": 800000,
-            "pincode": "600001",
-            "business_idea": "AI-powered education platform"
-        },
-        {
-            "name": "Anjali Patel",
-            "email": "anjali.patel@email.com",
-            "phone": "9876543233",
-            "entrepreneur_type": "investor",
-            "budget": 1200000,
-            "pincode": "302015",
-            "business_idea": "Luxury hospitality business"
-        },
-        {
-            "name": "Vikram Singh",
-            "email": "vikram.singh@email.com",
-            "phone": "9876543234",
-            "entrepreneur_type": "idea_owner",
-            "budget": 300000,
-            "pincode": "302031",
-            "business_idea": "Traditional handicraft marketplace"
-        },
-        {
-            "name": "Meera Iyer",
-            "email": "meera.iyer@email.com",
-            "phone": "9876543235",
-            "entrepreneur_type": "both",
             "budget": 600000,
-            "pincode": "500001",
-            "business_idea": "Health and wellness center"
+            "pincode": "560002",
+            "business_idea": "Want to start a tech service business"
         },
         {
-            "name": "Karan Malhotra",
-            "email": "karan.malhotra@email.com",
-            "phone": "9876543236",
+            "name": "Arjun Singh",
+            "email": "arjun@example.com",
+            "phone": "9876543232",
             "entrepreneur_type": "investor",
             "budget": 900000,
-            "pincode": "700001",
-            "business_idea": "Real estate investment"
+            "pincode": "560003",
+            "business_idea": "Interested in retail franchise"
         },
         {
-            "name": "Divya Gupta",
-            "email": "divya.gupta@email.com",
-            "phone": "9876543237",
+            "name": "Kavya Sharma",
+            "email": "kavya@example.com",
+            "phone": "9876543233",
             "entrepreneur_type": "idea_owner",
             "budget": 400000,
-            "pincode": "560001",
-            "business_idea": "Sustainable fashion brand"
+            "pincode": "560004",
+            "business_idea": "Planning to open a coffee shop"
         },
         {
-            "name": "Amit Kumar",
-            "email": "amit.kumar@email.com",
-            "phone": "9876543238",
-            "entrepreneur_type": "both",
-            "budget": 750000,
-            "pincode": "400001",
-            "business_idea": "E-commerce platform for local artisans"
-        },
-        {
-            "name": "Sneha Verma",
-            "email": "sneha.verma@email.com",
-            "phone": "9876543239",
+            "name": "Rohan Mehta",
+            "email": "rohan@example.com",
+            "phone": "9876543234",
             "entrepreneur_type": "investor",
+            "budget": 800000,
+            "pincode": "560005",
+            "business_idea": "Looking for beauty and wellness franchise"
+        },
+        {
+            "name": "Priya Patel",
+            "email": "priya.patel@example.com",
+            "phone": "9876543235",
+            "entrepreneur_type": "idea_owner",
             "budget": 1500000,
-            "pincode": "110001",
-            "business_idea": "Renewable energy solutions"
+            "pincode": "560006",
+            "business_idea": "Want to start a fitness center"
+        },
+        {
+            "name": "Aditya Verma",
+            "email": "aditya@example.com",
+            "phone": "9876543236",
+            "entrepreneur_type": "investor",
+            "budget": 500000,
+            "pincode": "560007",
+            "business_idea": "Interested in mobile retail business"
+        },
+        {
+            "name": "Neha Kapoor",
+            "email": "neha@example.com",
+            "phone": "9876543237",
+            "entrepreneur_type": "idea_owner",
+            "budget": 300000,
+            "pincode": "560008",
+            "business_idea": "Planning to start an educational center"
+        },
+        {
+            "name": "Vikrant Singh",
+            "email": "vikrant@example.com",
+            "phone": "9876543238",
+            "entrepreneur_type": "investor",
+            "budget": 1000000,
+            "pincode": "560001",
+            "business_idea": "Looking for healthcare franchise opportunities"
+        },
+        {
+            "name": "Ananya Das",
+            "email": "ananya@example.com",
+            "phone": "9876543239",
+            "entrepreneur_type": "idea_owner",
+            "budget": 450000,
+            "pincode": "560002",
+            "business_idea": "Want to start a bakery business"
         }
     ]
     
-    for i, entrepreneur in enumerate(entrepreneurs, 1):
-        try:
-            response = requests.post(f"{BASE_URL}/api/users/entrepreneur", json=entrepreneur)
-            if response.status_code == 200:
-                print(f"✅ Entrepreneur {i}: {entrepreneur['name']} - {entrepreneur['entrepreneur_type']} (Pincode: {entrepreneur['pincode']})")
-            else:
-                print(f"❌ Failed to add Entrepreneur {i}: {response.status_code}")
-        except Exception as e:
-            print(f"❌ Error adding Entrepreneur {i}: {e}")
+    for entrepreneur in entrepreneurs:
+        register_entrepreneur(**entrepreneur)
         time.sleep(0.5)
-
-def main():
-    """Main function to populate all sample data"""
-    print("🚀 Populating Sample Data for Business Matchmaking Platform")
-    print("=" * 60)
     
+    print("\n" + "=" * 60)
+    print("✅ Comprehensive sample data population completed!")
+    print("\n📊 Current Statistics:")
+    
+    # Check final stats
     try:
-        # Test if server is running
-        response = requests.get(f"{BASE_URL}/")
-        if response.status_code != 200:
-            print("❌ Server is not running. Please start the application first.")
-            return
-        
-        print("✅ Server is running. Starting data population...\n")
-        
-        # Add all sample data
-        add_property_owners()
-        add_franchise_companies()
-        add_entrepreneurs()
-        
-        print("\n🎉 Sample data population completed!")
-        print("=" * 60)
-        print("📊 Summary:")
-        print("   • 10 Property Owners added")
-        print("   • 10 Franchise Companies added")
-        print("   • 10 Entrepreneurs added")
-        print("\n🌐 Visit http://localhost:8000/recommendations to see AI-powered matches!")
-        
-    except requests.exceptions.ConnectionError:
-        print("❌ Cannot connect to server. Please make sure the application is running on http://localhost:8000")
+        response = requests.get(f"{BASE_URL}/api/stats")
+        if response.status_code == 200:
+            stats = response.json()
+            print(f"   Property Owners: {stats['total_property_owners']}")
+            print(f"   Franchise Companies: {stats['total_franchise_companies']}")
+            print(f"   Entrepreneurs: {stats['total_entrepreneurs']}")
+            print(f"   Total Users: {stats['total_users']}")
+        else:
+            print("❌ Could not fetch statistics")
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"❌ Error fetching statistics: {e}")
+    
+    print("\n🌐 Visit http://localhost:8000/recommendations to see the matches!")
+    print("💡 The matching should now work with proper budget compatibility.")
+    print("🎯 AI insights will be generated for all property owners.")
 
 if __name__ == "__main__":
     main()
